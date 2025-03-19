@@ -1,0 +1,190 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.show-more-btn:hover {
+    color: #53fc57 !important;
+}
+.show-more-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+    .buttonFx {
+        color: #0e2800;
+        display: flex;
+    }
+
+    .buttonFx:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .buttonFx:hover {
+        color: #53fc57; 
+    }
+
+    .dark-mode .buttonFx {
+        color: #53fc57;
+    }
+
+    .buttonDark {
+        color: #0e2800;
+        display: flex;
+        width: 300px;
+    }
+
+        .buttonDark:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .buttonDark:hover {
+            color: #53fc57;
+        }
+
+        .dark-mode .buttonDark {
+            color: #53fc57;
+        }
+
+        .dark-mode .buttonDark:hover {
+            color: white;
+        }
+
+        .dark-mode .navbar-toggler-icon{
+            fill:white;
+        }
+
+        .subText{
+            color:black;
+        }
+        .dark-mode .subText {
+            color: #53fc57;
+        }
+
+    .dark-mode {
+        background-color: #0f0f0f;
+        color: #ffffff;
+    }
+
+    .dark-mode .card {
+        background-color: #303030;
+        color: #ffffff;
+    }
+
+    .dark-mode .dropdown-menu {
+        background-color: #303030;
+        color: #ffffff;
+    }
+
+    .dark-mode .btn-group {
+        color: #ffffff;
+    }
+
+    .dark-mode .card-title {
+        color: #ffffff;
+    }
+
+    .dark-mode .modal-content {
+        background-color: #303030;
+        color: #ffffff;
+    }
+
+    .dark-mode a {
+        color: #53fc57;
+    }
+
+        .dark-mode .navbar {
+            background-color: #222222!important;
+            border-bottom-color: black;
+        }
+
+        .dark-mode .footer {
+            background-color: #222222 !important;
+            color: white;
+        }
+
+        .filter-btn.active {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .filter-btn {
+            color: #000000;
+        }
+        .dark-mode .filter-btn {
+            color: #fff;
+        }
+
+        .jumbotron {
+            background: #f8f9fa;
+            border-radius: 0.3rem;
+            margin-bottom: 2rem;
+            padding: 2rem 2rem;
+            text-align: center;
+        }
+
+        .jumbotron h1 {
+            font-weight: bold;
+        }
+
+        .jumbotron p.lead {
+            font-size: 1.25rem;
+        }
+
+        .card-img-top {
+            object-fit: cover;
+            max-height: 400px;
+        }
+
+        .dark-mode .jumbotron {
+            background: #0f0f0f;
+            border-radius: 0.3rem;
+            margin-bottom: 2rem;
+            padding: 2rem 2rem;
+            text-align: center;
+        }
+
+        .dark-mode .jumbotron h1 {
+            font-weight: bold;
+            color: green;
+        }
+
+        .dark-mode .jumbotron p.lead {
+            font-size: 1.25rem;
+            color:white;
+        }
+
+        .dark-mode .card-img-top {
+            object-fit: cover;
+            max-height: 400px;
+        }
+

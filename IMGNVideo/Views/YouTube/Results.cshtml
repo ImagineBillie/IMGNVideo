@@ -1,0 +1,290 @@
+﻿@model IEnumerable<IMGNVideo.Models.YouTubeVideo>
+
+@{
+    ViewData["Title"] = "Search Results";
+    var videos = Model.ToList();
+}
+    
+@functions {
+    public string GetRelativeTime(DateTime publishedDate)
+    {
+        var timeSpan = DateTime.Now - publishedDate;
+        if (timeSpan.TotalDays >= 365)
+            return $"{(int)(timeSpan.TotalDays / 365)} year{(timeSpan.TotalDays / 365 >= 2 ? "s" : "")} ago";
+        if (timeSpan.TotalDays >= 30)
+            return $"{(int)(timeSpan.TotalDays / 30)} month{(timeSpan.TotalDays / 30 >= 2 ? "s" : "")} ago";
+        if (timeSpan.TotalDays >= 1)
+            return $"{(int)timeSpan.TotalDays} day{(timeSpan.TotalDays >= 2 ? "s" : "")} ago";
+        if (timeSpan.TotalHours >= 1)
+            return $"{(int)timeSpan.TotalHours} hour{(timeSpan.TotalHours >= 2 ? "s" : "")} ago";
+        if (timeSpan.TotalMinutes >= 1)
+            return $"{(int)timeSpan.TotalMinutes} minute{(timeSpan.TotalMinutes >= 2 ? "s" : "")} ago";
+        return "just now";
+    }
+
+    // Limits the description to a specified number of words (default is 20)
+    public string GetLimitedDescription(string description, int wordLimit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+            return "";
+        var words = description.Split(' ');
+        if (words.Length <= wordLimit)
+            return description;
+        return string.Join(" ", words.Take(wordLimit)) + "...";
+    }
+}
+
+@functions {
+    private string FormatViewCount(long viewCount)
+    {
+        if (viewCount < 1000)
+        {
+            // e.g. 999 => "999"
+            return viewCount.ToString();
+        }
+        else if (viewCount < 1_000_000)
+        {
+            // e.g. 12,345 => 12.3K
+            double thousands = viewCount / 1000.0;
+            return thousands.ToString("0.#") + "K";
+        }
+        else if (viewCount < 1_000_000_000)
+        {
+            // e.g. 1,234,567 => 1.2M
+            double millions = viewCount / 1_000_000.0;
+            return millions.ToString("0.#") + "M";
+        }
+        else
+        {
+            // e.g. 1,234,567,890 => 1.2B
+            double billions = viewCount / 1_000_000_000.0;
+            return billions.ToString("0.#") + "B";
+        }
+    }
+}
+
+<div class="d-flex justify-content-end mb-3 sort-filters-dark" style="margin-top:110px">
+    <!-- Sort By Dropdown -->
+    <div class="btn-group">
+        <button type="button" class="buttonFx btn btn-link text-decoration-none fw-bold dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Sort By
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="@Url.Action("Results", "YouTube", new {
+                query = Context.Request.Query["query"],
+                uploadDate = Context.Request.Query["uploadDate"],
+                duration = Context.Request.Query["duration"],
+                sortBy = "latest"
+            })">Latest</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="@Url.Action("Results", "YouTube", new {
+                query = Context.Request.Query["query"],
+                uploadDate = Context.Request.Query["uploadDate"],
+                duration = Context.Request.Query["duration"],
+                sortBy = "oldest"
+            })">Oldest</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="@Url.Action("Results", "YouTube", new {
+                query = Context.Request.Query["query"],
+                uploadDate = Context.Request.Query["uploadDate"],
+                duration = Context.Request.Query["duration"],
+                sortBy = "most-viewed"
+            })">Most Viewed</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="@Url.Action("Results", "YouTube", new {
+                query = Context.Request.Query["query"],
+                uploadDate = Context.Request.Query["uploadDate"],
+                duration = Context.Request.Query["duration"],
+                sortBy = ""
+            })">Relevance</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Filters Button -->
+    @* <button type="button" class="buttonFx btn btn-link text-decoration-none fw-bold me-3" data-bs-toggle="modal" data-bs-target="#filterModal"> *@
+    @*     Filters &nbsp; *@
+    @*     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel-fill" viewBox="0 0 16 16"> *@
+    @*         <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z" /> *@
+    @*     </svg> *@
+    @* </button> *@
+</div>
+
+<!-- Filter Modal -->
+@* <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true"> *@
+@*     <div class="modal-dialog modal-lg"> *@
+@*         <div class="modal-content"> *@
+@*             <!-- Form to submit filter values immediately --> *@
+@*             <form method="get" action="@Url.Action("Results", "YouTube")" id="filtersForm"> *@
+@*                 <!-- Preserve the user's search query --> *@
+@*                 <input type="hidden" name="query" value="@ViewContext.HttpContext.Request.Query["query"]" /> *@
+@*                 <!-- Hidden inputs for filters --> *@
+@*                 <input type="hidden" name="uploadDate" id="uploadDateHidden" /> *@
+@*                 <input type="hidden" name="type" id="typeHidden" /> *@
+@*                 <input type="hidden" name="duration" id="durationHidden" /> *@
+
+@*                 <div class="modal-header"> *@
+@*                     <h5 class="modal-title" id="filterModalLabel">Filters</h5> *@
+@*                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
+@*                 </div> *@
+
+@*                 <div class="modal-body"> *@
+@*                     <div class="row"> *@
+@*                         <!-- Upload Date Column --> *@
+@*                         <div class="col"> *@
+@*                             <h6>Upload Date</h6> *@
+@*                             <hr> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="uploadDate" data-filter-value="lastHour">Last hour</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="uploadDate" data-filter-value="today">Today</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="uploadDate" data-filter-value="thisWeek">This week</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="uploadDate" data-filter-value="thisMonth">This month</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="uploadDate" data-filter-value="thisYear">This year</button> *@
+@*                         </div> *@
+@*                         <!-- Type Column --> *@
+@*                         <div class="col"> *@
+@*                             <h6>Type</h6> *@
+@*                             <hr> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="type" data-filter-value="video">Video</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="type" data-filter-value="channel">Channel</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="type" data-filter-value="playlist">Playlist</button> *@
+@*                         </div> *@
+@*                         <!-- Duration Column --> *@
+@*                         <div class="col"> *@
+@*                             <h6>Duration</h6> *@
+@*                             <hr> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="duration" data-filter-value="under4">under 4 minutes</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="duration" data-filter-value="4to20">4 to 20 minutes</button> *@
+@*                             <button type="button" class="btn filter-btn" data-filter-group="duration" data-filter-value="over20">over 20 minutes</button> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*                 <!-- We removed the modal footer with Apply/Cancel buttons --> *@
+@*             </form> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+
+
+<!-- Video Container -->
+@if (!videos.Any())
+{
+    <p>No videos found for your search.</p>
+}
+else
+{
+    <div id="video-container" class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var video in videos.Take(12)) // Show first 12 videos
+        {
+            <div class="col video-item">
+                <div class="card h-100 d-flex flex-column">
+                    <img src="@video.ThumbnailUrl" class="card-img-top" alt="@video.Title" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@video.Title</h5>
+                        <small style="color:gray">@video.ChannelName</small>
+                        <div class="d-flex mb-2">
+                            <small class="text-end" style="color:gray">
+                                @FormatViewCount(video.ViewCount) views
+                            </small>
+
+                            &nbsp;
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#808080" class="bi bi-dot mt-1" viewBox="0 0 16 16">
+                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" />
+                            </svg>
+                            <small style="color:gray">@GetRelativeTime(video.PublishedAt)</small>
+                        </div>
+                        <p class="card-text flex-grow-1" style="color:gray">@GetLimitedDescription(video.Description, 10)</p>
+                        <a href="@($"https://www.youtube.com/watch?v={video.VideoId}")"
+                           target="_blank"
+                           class="btn btn-primary btn-sm mt-auto">
+                            Watch Video
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Show More Button -->
+    @if (videos.Count > 12)
+    {
+        <div class="my-3 d-flex align-items-center justify-content-center">
+            <hr class="flex-grow-1" />
+            <button id="show-more-btn"
+                    class="btn btn-link text-decoration-none fw-bold mx-3 show-more-btn"
+                    style="font-size:10px; color:gray">
+                Show More
+            </button>
+            <hr class="flex-grow-1" />
+        </div>
+    }
+
+    <!-- Store Remaining Videos in JSON -->
+    <script>
+        const remainingVideos = @Html.Raw(Json.Serialize(videos.Skip(12)));
+    </script>
+    <!-- Sort By  -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".sort-option").forEach(item => {
+                item.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const sortBy = this.getAttribute("data-sort");
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.set("sortBy", sortBy);
+                    window.location.href = window.location.pathname + "?" + urlParams.toString();
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to submit the filters form immediately
+            function submitFilters() {
+                // Immediately submit the form
+                document.getElementById("filtersForm").submit();
+            }
+
+            // For each filter button
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                // Store original text so we can restore it later
+                btn.dataset.originalText = btn.innerHTML.trim();
+
+                btn.addEventListener("click", function () {
+                    const group = this.getAttribute("data-filter-group");
+                    const value = this.getAttribute("data-filter-value");
+                    const hiddenInput = document.getElementById(group + "Hidden");
+
+                    // Check if this button is already active
+                    if (this.classList.contains("active")) {
+                        // If active, remove active state and clear the corresponding hidden field
+                        this.classList.remove("active");
+                        this.innerHTML = this.dataset.originalText;
+                        hiddenInput.value = "";
+                    } else {
+                        // If not active, clear other buttons in this group
+                        document.querySelectorAll(`.filter-btn[data-filter-group="${group}"]`)
+                            .forEach(b => {
+                                b.classList.remove("active");
+                                b.innerHTML = b.dataset.originalText;
+                            });
+                        // Mark this one active, update its text to show an "X" (you can style this as needed)
+                        this.classList.add("active");
+                        this.innerHTML = this.dataset.originalText + ' <span style="color:red; cursor:pointer;">X</span>';
+                        // Set the corresponding hidden input's value
+                        hiddenInput.value = value;
+                    }
+                    // Immediately submit the form with updated filter values
+                    submitFilters();
+                });
+            });
+        });
+    </script>
+
+
+}
